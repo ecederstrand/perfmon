@@ -1,0 +1,124 @@
+PXE:
+------------------
+go get boot/pxeboot
+
+TFTP:
+------------------
+get boot/pxeboot
+
+NFS (summary):
+------------------
+get boot/loader.rc
+get boot/loader.4th
+get boot/support.4th
+get boot/defaults/loader.conf
+get boot/device.hints
+get boot/loader.conf
+get boot/kernel/linker.hints
+get boot/kernel/kernel
+get boot/jumpstart.gz
+get boot/kernel/acpi.ko
+
+NFS (full):
+-----------
+try boot/boot.4th.split
+try boot/boot.4th.gz.split
+try boot/boot.4th.gz
+try boot/boot.4th
+try boot/loader.rc.split
+try boot/loader.rc.gz.split
+try boot/loader.rc.gz
+get boot/loader.rc
+
+try boot/loader.4th.split
+try boot/loader.4th.gz.split
+try boot/loader.4th.gz
+get boot/loader.4th
+
+try boot/support.4th.split
+try boot/support.4th.gz.split
+try boot/support.4th.gz
+get boot/support.4th
+
+try boot/defaults/loader.conf.split
+try boot/defaults/loader.conf.gz.split
+try boot/defaults/loader.conf.gz
+get boot/defaults/loader.conf
+
+try boot/device.hints.split
+try boot/device.hints.gz.split
+try boot/device.hints.gz
+get boot/device.hints
+
+try boot/loader.conf.split
+try boot/loader.conf.gz.split
+try boot/loader.conf.gz
+get boot/loader.conf
+
+try boot/loader.conf.local.split
+try boot/loader.conf.local.gz.split
+try boot/loader.conf.local.gz
+try boot/loader.conf.local
+try boot/nextboot.conf.split
+try boot/nextboot.conf.gz.split
+try boot/nextboot.conf.gz
+try boot/nextboot.conf
+try boot/kernel/linker.hints.split
+try boot/kernel/linker.hints.gz.split
+try boot/kernel/linker.hints.gz
+get boot/kernel/linker.hints???
+
+try boot/kernel/linker.hints.split
+try boot/kernel/linker.hints.gz.split
+try boot/kernel/linker.hints.gz
+get boot/kernel/linker.hints
+
+try boot/kernel/kernel.ko.split
+try boot/kernel/kernel.ko.gz.split
+try boot/kernel/kernel.ko.gz
+try boot/kernel/kernel.ko
+try boot/kernel/kernel.split
+try boot/kernel/kernel.gz.split
+try boot/kernel/kernel.gz
+try boot/kernel/kernel ???
+
+try boot/kernel/kernel.split
+try boot/kernel/kernel.gz.split
+try boot/kernel/kernel.gz
+try boot/kernel/kernel ???
+
+try boot/kernel/kernel.split
+try boot/kernel/kernel.gz.split
+try boot/kernel/kernel.gz
+get boot/kernel/kernel
+
+try boot/zfs/zpool.cache.split
+try boot/zfs/zpool.cache.gz.split
+try boot/zfs/zpool.cache.gz
+try boot/zfs/zpool.cache
+try boot/jumpstart.split
+try boot/jumpstart.gz.split
+try boot/jumpstart.gz???
+
+try boot/jumpstart.split
+try boot/jumpstart.gz.split
+get boot/jumpstart.gz
+
+try boot/boot.conf.split
+try boot/boot.conf.gz.split
+try boot/boot.conf.gz
+try boot/boot.conf
+try boot/kernel/acpi.ko.split
+try boot/kernel/acpi.ko.gz.split
+try boot/kernel/acpi.ko.gz
+try boot/kernel/acpi.ko???
+
+try boot/kernel/acpi.ko.split
+try boot/kernel/acpi.ko.gz.split
+try boot/kernel/acpi.ko.gz
+try boot/kernel/acpi.ko???
+
+try boot/kernel/acpi.ko.split
+try boot/kernel/acpi.ko.gz.split
+try boot/kernel/acpi.ko.gz
+get boot/kernel/acpi.ko

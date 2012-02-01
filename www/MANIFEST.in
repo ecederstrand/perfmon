@@ -1,0 +1,2 @@
+recursive-include perfmon/public *
+recursive-include perfmon/templates *

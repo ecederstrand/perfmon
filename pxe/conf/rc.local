@@ -1,0 +1,57 @@
+echo ""
+echo "Preparing local disk"
+
+echo "Nuking any previous filesystem"
+/sbin/sysctl kern.geom.debugflags=16
+/bin/dd if=/dev/zero of=/dev/ad0 bs=512 count=1k
+
+echo "Formatting ad0"
+/sbin/fdisk -BI -b /boot/mbr ad0
+
+echo "Creating partitions and swap"
+/sbin/bsdlabel -B -b /boot/boot -R ad0s1 /etc/disklayout
+
+echo "Creating file system"
+/sbin/newfs /dev/ad0s1a
+
+echo "Mounting file system"
+/sbin/mount /dev/ad0s1a /mnt
+
+echo "Mounting distpkg directory over NFS"
+/bin/mkdir /tmp/mnt
+/sbin/mount_nfs 192.168.1.5:/perfmon/slaves/src/packages /tmp/mnt
+
+HOSTNAME=`/bin/hostname`
+QUEUE="/tmp/mnt/queue.$HOSTNAME"
+echo "This is perfmon slave $HOSTNAME"
+echo "Determining distfile to use"
+
+if [ ! -f "$QUEUE" ]; then
+   # Create queue file on server
+   /usr/bin/touch "$QUEUE"
+   echo "Created new queue file for this slave"
+fi
+
+if [ `/usr/bin/wc -l < $QUEUE` -lt "1" ]; then
+   # Empty queue, use default distpkg for now
+   DISTPKG="default.tgz"
+   echo "Queue is empty, using default package"
+else
+   # Get distpkg at top of queue 
+   DISTPKG=`/usr/bin/head -n 1 $QUEUE | /usr/bin/tr -d '\n'`
+   # Remove that entry
+   /usr/bin/sed -i /$DISTPKG/d "$QUEUE"
+   echo "Using $DISTPKG from queue"
+fi
+
+echo "Extracting dist file to local disk"
+/usr/bin/tar -zxf "/tmp/mnt/$DISTPKG" -C/mnt
+
+# Remove the tarball if no other slaves are scheduled to run it.
+# This saves disk space on the server.
+if ! /usr/bin/grep "$DISTPKG" /tmp/mnt/queue.*; then
+    rm "/tmp/mnt/$DISTPKG"
+fi
+
+echo "Done. Rebooting..."
+/sbin/reboot

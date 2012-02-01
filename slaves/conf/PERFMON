@@ -1,0 +1,14 @@
+# Kernel to use for PERFMON
+
+include GENERIC
+ident		PERFMON
+
+# Disable debugging
+nomakeoptions	DEBUG
+nooptions 	KDB
+nooptions 	DDB
+nooptions 	GDB
+nooptions 	INVARIANTS
+nooptions 	INVARIANT_SUPPORT
+nooptions 	WITNESS
+nooptions 	WITNESS_SKIPSPIN

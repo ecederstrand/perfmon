@@ -1,0 +1,11 @@
+# This file is used by PerfMon. Do not edit.
+*default release=cvs
+*default delete use-rel-suffix compress
+src-all
+cvsroot-all
+ports-base
+ports-benchmarks
+ports-converters
+ports-databases
+ports-devel
+ports-lang

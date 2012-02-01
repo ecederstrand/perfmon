@@ -1,0 +1,6 @@
+# /dev/md4s1:
+8 partitions:
+#    size   offset    fstype   [fsize bsize bps/cpg]
+a:    10G       16    4.2BSD     2048 16384    8
+b:   500M        *      swap
+c:      *        *    unused        0     0

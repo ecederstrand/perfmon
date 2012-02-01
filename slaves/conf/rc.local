@@ -1,0 +1,9 @@
+/usr/local/bin/python /root/runbench.py
+
+echo ""
+echo "Nuking MBR, so this machine starts network booting on reboot."
+/sbin/sysctl kern.geom.debugflags=16
+/bin/dd if=/dev/zero of=/dev/ad0 bs=512 count=1
+/sbin/sysctl kern.geom.debugflags=0
+echo "Rebooting now..."
+/sbin/reboot

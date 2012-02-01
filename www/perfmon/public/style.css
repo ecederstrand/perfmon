@@ -1,0 +1,97 @@
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+#main {
+	margin: 0px;
+	padding: 0px;
+}
+
+#header {
+	height: 70px;
+	margin: 0px;
+	padding: 0px;
+	background: #ffffff url('hdr_fill.png') repeat-x;
+}
+
+#header h1 {
+	margin: 0 0 0 10px;
+	color: #ffffff;
+	font-size: 2em;
+}
+
+#header a { text-decoration: none; }
+#header h1 a { color: #ffffff; }
+#header p {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.7em;
+    color: #999999;
+}
+#header p a { color: #666666; }
+
+#left {
+	float: left;
+	width: 714px;
+}
+
+#right {
+	margin-left: 714px;
+}
+
+#plot {
+	height: 517px;
+}
+
+.box {
+	border: #999999 solid 1px;
+	font-size: 75%;
+	padding: 0px;
+}
+#left .box {
+	margin: 8px 4px 8px 8px;
+}
+#right .box {
+	margin: 8px 8px 8px 4px;
+}
+
+.box h1 {
+	font-size: 0.9em;
+	margin: 0px;
+	padding: 1px 0px 1px 2px;
+	border-bottom: #999999 solid 1px;
+}
+.box h2 {
+    font-size: 0.9em;
+}
+.box img {
+	border: 0px;
+}
+.box td {
+    vertical-align: top;
+    padding: 0 5px 0 5px;
+    white-space: nowrap;
+}
+.box th {
+    text-align: left;
+    padding-left: 10px;
+}
+.toggle {
+    float: right;
+    position: relative;
+    top: -17px;
+    margin: 3px;
+    font-size: 0.9em;
+    color: #666666;
+    text-decoration: none;
+    font-weight: normal;
+}
+#alerts td {
+    border: #999999 solid 1px;
+    padding: 0px;
+}
+#alerts a {
+    color: black;
+    text-decoration: none;
+}
