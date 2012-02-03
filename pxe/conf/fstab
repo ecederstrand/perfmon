@@ -1,4 +1,4 @@
 ### Common fstab for diskless clients
 # Device                          Mount  FStype  Options  Dump  Pass
-192.168.1.5:/perfmon/pxe/diskless /      nfs     ro       0     0
+10.20.30.1:/perfmon/pxe/diskless /      nfs     ro       0     0
 proc                              /proc  procfs  rw       0     0

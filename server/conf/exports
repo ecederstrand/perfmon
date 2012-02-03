@@ -1,2 +1,2 @@
-/perfmon/pxe/diskless -ro -maproot=root:wheel -network 192.168.0.0 -mask 255.255.0.0
-/perfmon/slaves/src/packages -maproot=root:wheel -network 192.168.0.0 -mask 255.255.0.0
+/perfmon/pxe/diskless -ro -maproot=root:wheel -network 10.20.30.0 -mask 255.255.255.0
+/perfmon/slaves/src/packages -maproot=root:wheel -network 10.20.30.0 -mask 255.255.255.0

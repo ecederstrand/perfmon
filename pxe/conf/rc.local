@@ -19,7 +19,7 @@ echo "Mounting file system"
 
 echo "Mounting distpkg directory over NFS"
 /bin/mkdir /tmp/mnt
-/sbin/mount_nfs 192.168.1.5:/perfmon/slaves/src/packages /tmp/mnt
+/sbin/mount_nfs 10.20.30.1:/perfmon/slaves/src/packages /tmp/mnt
 
 HOSTNAME=`/bin/hostname`
 QUEUE="/tmp/mnt/queue.$HOSTNAME"
