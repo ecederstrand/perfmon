@@ -5,20 +5,23 @@
 # This has only been tested with directories containing files, symlinks and
 # regular files.
 #
-# Use: inflate.sh /full/path/to/2007.02.03.04.00.00
+# Use: inflate.sh /full/path/to/branch/revision
 
-BASE=$(dirname $1)
-DATE=$(basename $1)
+REVDIR=$1
+[ ! -d "$REVDIR" ] && echo "$REVDIR is not a directory" && exit
+[ ! -d "$REVDIR/compressed" ] && echo "$REVDIR/compressed is not a directory" && exit
 
-MASTER=`date -jf "%C%y.%m.%d.%H.%M.%S" $DATE "+$BASE/%C%y.%m-master/full"`
-TARGET="$BASE/$DATE/compressed"
+BRANCHDIR=$(dirname $REVDIR)
+REV=$(basename $REVDIR)
+REV_NUMBER=`echo '$REV' | sed 's/r//'`
+MASTERREV=`bc -e '$REV_NUMBER / 1000 * 1000' -e quit`
 
-[ ! -d "$MASTER" ] && echo "$MASTER is not a directory" && exit
-[ ! -d "$TARGET" ] && echo "$MASTER is not a directory" && exit
+MASTERDIR="$BRANCHDIR/r$MASTERREV-master"
+[ ! -d "$MASTERDIR" ] && echo "$MASTERDIR is not a directory" && exit
 
-echo "Creating $TARGET/full.tgz"
+echo "Creating $TARGETDIR/full.tgz"
 
-cd $BASE
+cd "$REVDIR"
 cp -R compressed full
 cd full
 
@@ -28,7 +31,7 @@ for patch in `find ./ -type f -name "*.bsdiff"`
 do
     orig=`echo $patch | sed 's/.bsdiff//'`
     echo "Patching $orig"
-    bspatch $MASTER/$orig $orig $patch
+    bspatch $MASTERDIR/$orig $orig $patch
     rm $patch
 done
 

@@ -11,9 +11,9 @@ cp "$SLAVEDIR"/bin/Perfmon/benchmarks.py root/Perfmon
 cp "$SLAVEDIR"/bin/Perfmon/__init__.py root/Perfmon
 cp "$SLAVEDIR"/bin/runbench.py root
 
-# Record CVS date somewhere
+# Record SVN revision somewhere
 touch etc/cvs_date
-echo "$DATE" > etc/cvs_date
+echo "$BUILD_ID" > etc/perfmon_build_id
 
 
 # Archive this package
@@ -24,16 +24,16 @@ echo "$DATE" > etc/cvs_date
 #
 # Archive hierarchy:
 # packages/
-#    2007.01-master/            # Monthly full directory
+#    r123000-master/            # Full directory every 1000 revs
 #       full/
 #       md5digest.mtree
 #       master.mtree
-#    2007.01.01.08.00.00/
+#    r123456/
 #       full/                   # This is the temporary destdir
 #       compressed/
 #       full.mtree
 #       full.tgz                # This package is in the queue
-#    2007.01.02.08.00.00/
+#    r123457/
 #       compressed/
 #       full.mtree
 #    
@@ -44,25 +44,8 @@ echo "$DATE" > etc/cvs_date
 find ./ -type f -name ".pyc" -delete
 find ./ -type f -name ".pyo" -delete
 
-# For archives created with a version of ar not supporting -D, we need
-# to create a nulled-out version of the archive so timestamps etc. are
-# ignored. This reduces the diff. AR must support the -D flag.
-TMPARDIR=/tmp/scratchAR
-AR=/us/bin/ar
-rm -rf $TMPARDIR
-mkdir $TMPARDIR
-cd $TMPARDIR
-for f in `find "$DESTDIR" -type f -name "*.a"`: do
-	$AR -x "$f" # Extract members
-	a=`basename $f`
-	$AR -rD "$a" `$AR -t "$f"` # Create a new deterministic archive
-	mv "$a" "$f" # Replace
-	rm *
-done
-cd "$DESTDIR"
-
-MASTERDIR=`date -jf "%C%y.%m.%d.%H.%M.%S" $DATE "+$SRCPKGDIR/%C%y.%m-master"`
-DESTMAINDIR=$(dirname $DESTDIR)
+MASTERREV=`bc -e '$REV / 1000 * 1000' -e quit`
+MASTERDIR="$BRANCHDIR/r$MASTERREV-master"
 
 if [ ! -d "$MASTERDIR" ]; then
    log "Creating master package in $MASTERDIR"
@@ -73,19 +56,19 @@ if [ ! -d "$MASTERDIR" ]; then
    mtree -cnk md5digest > ../md5digest.mtree
 fi
 
-log "Creating source package in $DESTMAINDIR"
-cd $DESTDIR
+log "Creating source package in $REVDIR"
+cd "$DESTDIR"
 mtree -cnk type,uid,gid,mode,flags,link > ../full.mtree
 tar -czf ../full.tgz .
 
-log "Creating compressed archive in $DESTMAINDIR"
+log "Creating compressed archive in $REVDIR"
 # Swap all changed files with a diff to the master file. Lost immutable flags 
 # will be recreated by mtree later.
 for f in `mtree -ef $MASTERDIR/md5digest.mtree | grep ' changed$' | awk '{print $1}'`
 do
-    bsdiff "$MASTERDIR/full/$f" $f $f.bsdiff
-    chflags noschg $f
-    rm $f
+    bsdiff "$MASTERDIR/full/$f" "$f" "$f.bsdiff"
+    chflags noschg "$f"
+    rm "$f"
 done
 # Replace all regular files with hardlinks if they exist in MASTERDIR. Hardlinks 
 # are used to distinguish the files from pre-existing softlinks. Files will lose
@@ -98,19 +81,18 @@ done
 # Recreate flags removed in the above loop.
 cd "$MASTERDIR/full"
 mtree -Uf ../master.mtree
-cd $DESTMAINDIR
+cd "$REVDIR"
 mv full compressed
 
-cd $SRCPKGDIR
-DESTMAINDIR_BASE=$(basename $DESTMAINDIR)
+cd "$SRCPKGDIR"
 # Add the package to the queue of all slaves. Paths are relative to SRCPKGDIR.
 for queue in queue.*
 do
-   echo "$DESTMAINDIR_BASE/full.tgz" >> $queue
+   echo "$REVDIR/full.tgz" >> $queue
 done
 
 # (Old behaviour, only used when queue is empty)
 # See pxe/conf/rc.local for how the queue is consumed
 # In case the queue is emptied, point distpkg.tgz to the newest package
-ln -fs "$DESTMAINDIR_BASE/full.tgz" "$DISTPKGNAME"
+ln -fs "$REVDIR/full.tgz" "$DEFAULTDISTPKG"
 

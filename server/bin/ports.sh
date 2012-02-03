@@ -22,11 +22,11 @@ do
       cd "$PORTSDIR/$line"
       log "Installing $line"
       portname=`echo $line | sed s,.*/,,` # Strip the directory part of the line
-      # if ! make install clean DESTDIR="$DESTDIR" > "$LOGDIR/install-$portname-$DATE.log" 2>&1; then
+      # if ! make install clean DESTDIR="$DESTDIR" > "$LOGDIR/install-$portname-$BUILD_ID.log" 2>&1; then
       # DESTDIR is buggy somehow. Use chroot directly instead.
       if ! chroot "$DESTDIR" /bin/sh -c "cd /usr/ports/$line; WRKDIRPREFIX=/tmp make BATCH=yes install clean; " \
-            > "$LOGDIR/install-$portname-$DATE.log" 2>&1; then
-         log "Failed to install $line. See $LOGDIR/install-$portname-$DATE.log for details." 1
+            > "$LOGDIR/install-$portname-$BUILD_ID.log" 2>&1; then
+         log "Failed to install $line. See $LOGDIR/install-$portname-$BUILD_ID.log for details." 1
          skip=1
       fi
    else

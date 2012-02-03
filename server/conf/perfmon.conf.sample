@@ -1,12 +1,11 @@
-####################################################################
-# Local variables. Change these, and save the file as perfmon.conf #
-####################################################################
+################################################################################
+# Local settings. Change these if necessary, and save the file as perfmon.conf #
+################################################################################
 
-BRANCH="CURRENT"           # This must be a valid branch or tag name. "CURRENT" translates to "."
-PERFMONDIR="/perfmon"      # Root directory for PerfMon. Don't make the path too 
-                           # long, mount_nullfs will complain
+PERFMONDIR="/perfmon"      # Root directory for PerfMon. Don't make the path too long or mount_nullfs will complain.
+BRANCH="head"              # This must be a path to a valid src base on svn.freebsd.org, e.g. 'head', 'stable/9', 'releng/9.0', 'projects/bhyve' or 'user/luigi/netmap'
 LOCALTLDS="dk,de,no,se,fi" # Country codes for fastest_cvsup to test
-TARGET=i386                # If your slaves are a different arch
-TARGET_ARCH=i386
+TARGET=amd64               # Change this if your slaves are a different arch
+TARGET_ARCH=amd64
 
 # LOG="$LOGDIR/perfmon.log" # Messages go to stdout if LOG is not defined

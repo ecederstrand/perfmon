@@ -10,7 +10,7 @@ export PATH
 
 DIRNAME=$(dirname $0) # Temp variable for importing conf files
 
-. "$DIRNAME/common.lib"  # Pull in common functions
+. "$DIRNAME/common.sh"  # Pull in common functions
 
 . "$DIRNAME/../conf/defaults/perfmon.conf"
 if [ -r "$DIRNAME/../conf/perfmon.conf" ]; then
@@ -54,27 +54,23 @@ SCRIPT_NAME=$(basename $0)
 ALLLOGS=0       # If set to 1, save all log files, not just error logs
 CLEAN=0         # If set, check out new working copies of the src/ports repos
 LOOP=0          # The script can loop forever, or run once
-# The CVS date to use can be set from the command line.
-# This will probably not work for dates earlier than the
-# build CVS date of the host. Setting the date only influences
-# the first run.
+
 while getopts acd:e:i:l OPTION
 do
     case $OPTION in
         a) ALLLOGS=1;;
         c) CLEAN=1;;
-        d) CMD_DATE="$OPTARG";;
+        r) CMD_REV="$OPTARG";;
         e) EMAIL="$OPTARG";;
-        i) INTERVAL="$OPTARG";;
+        n) INTERVAL="$OPTARG";;
         l) LOOP=1;;
        \?) echo "usage: ${SCRIPT_NAME} [ -acl ] [ -d YYYY.MM.DD.HH.mm.ss [ -i interval ] ]
        -a: Save all log files. If unset, only save error logs.
-       -c: Delete local working copies of the src/ports repos and check out new ones.
-       -e: Email to send notice to when the build has completed (or failed).
+       -c: Delete local working copies of the src and ports and check out new ones.
+       -e: Send notice to this email address when the build has completed (or failed).
        -l: Run forever. If unset, only run once.
-       -d: Date to update sources to. If unset, update to latest source.
-       -i: Time interval to change source date with. See -v option of date(1) 
-           for documentation. Only in combination with -l and -d."
+       -r: SVN revision to update sources to. If unset, update to HEAD.
+       -n: Number of SVN revisions to increase the current revision with on the next iteration. If unset, update to HEAD"
            exit 1;;
     esac
 done
@@ -94,8 +90,8 @@ if [ ! -x "/usr/local/bin/fastest_cvsup" ]; then
    log "You need to install sysutils/fastest_cvsup." 3
    exit 1
 fi
-if [ ! -x "/usr/local/bin/cvsup" ]; then
-   log "You need to install net/cvsup." 3
+if [ ! -x "/usr/local/bin/svn" ]; then
+   log "You need to install devel/subversion." 3
    exit 1
 fi
 
@@ -112,38 +108,35 @@ if [ "$LOOP" = "0" ]; then
 else
    log "The script will run forever, or until Ctrl-C."
 fi
-if [ -n "$CMD_DATE" ]; then
-   log "The first run will use CVS date $CMD_DATE\n\n"
+if [ -n "$CMD_REV" ]; then
+   log "The first run will use SVN revision $CMD_REV\n\n"
 else
-   log "The script will update to current sources $DELAY and run from there.\n\n"
+   log "The script will update to current sources and run from there.\n\n"
 fi
 if [ -n "$INTERVAL" ]; then
-   log "The script will proceed, changing the date $INTERVAL on every run.\n\n"
+   log "The script will move forward $INTERVAL revisions on every run.\n\n"
 fi
 
-if [ ! -d "$SUPBASE/CVSROOT" ]; then
-   log "You don't seem to have a local CVS repo in $SUPBASE. Please create one, as detailed in development(7)." 3
+if [ ! -d "$SVNMIRROR/hooks" ]; then
+   log "You don't seem to have a local SVN mirror in $SVNMIRROR. Please create one, as detailed in http://wiki.freebsd.org/SubversionPrimer#Setting_up_a_svnsync_mirror." 3
    exit 1
 fi
 
 if [ "$CLEAN" -eq "1" ]; then
    # Wipe out working directory and check out a clean version from the local CVS repo
    log "Wiping out working copy and checking out new version"
-   rm -r "$WORKDIR/src" "$WORKDIR/ports"
+   rm -r "$SRCDIR" "$PORTSDIR"
 
    cd "$WORKDIR"
-   if [ "$BRANCH" = "CURRENT" ]; then
-      cvs -qd "$SUPBASE" checkout -P src > /dev/null
-   else
-      cvs -qd "$SUPBASE" checkout -r $BRANCH -P src > /dev/null
+   svn co "file://$SVNMIRROR/$BRANCH" "$SRCDIR" > /dev/null
    fi
    cvs -q -d "$SUPBASE" checkout -P ports > /dev/null
 else
-   if [ ! -d "$WORKDIR/src" ]; then
-      log "You don't seem to have a local working copy in $WORKDIR. Use the -c option to create one." 3
+   if [ ! -r "$SRCDIR/ObsoleteFiles.inc" ]; then
+      log "You don't seem to have a local working copy in $SRCDIR. Use the -c option to create one." 3
       exit 1
    fi
-   log "Using previous working copy of the src/ports repos"
+   log "Using current working copy of the src/ports repos"
 fi
 
 # ccache setup
@@ -171,36 +164,36 @@ do
     fi
     diskspace=`df -m $LOGDIR | grep /dev | awk '{print $4}'`
     if [ "$diskspace" -lt "100" ]; then
-       log "The  disk space in $LOGDIR is critically low. $diskspace MB left." 3
+       log "The disk space in $LOGDIR is critically low. $diskspace MB left." 3
        exit 1
     fi
 
 
     # Part 1: Get the latest (or requested) src and ports sources.
     # This populates or updates work/.
-    . $SERVERDIR/bin/update.sh
+    . $BINDIR/update.sh
 
 
     # Part 2: Build world.
     # This populates work/obj.
-    [ "$skip" -ne "1" ] && . $SERVERDIR/bin/buildworld.sh
+    [ "$skip" -ne "1" ] && . $BINDIR/buildworld.sh
 
 
     # Part 3: Build kernels.
     # This further populates work/obj.
-    [ "$skip" -ne "1" ] && . $SERVERDIR/bin/buildkernel.sh
+    [ "$skip" -ne "1" ] && . $BINDIR/buildkernel.sh
 
 
     # Part 4: Install files to a temp directory
-    [ "$skip" -ne "1" ] && . $SERVERDIR/bin/install.sh
+    [ "$skip" -ne "1" ] && . $BINDIR/install.sh
 
 
     # Part 5: Install ports into the temp directory
-    [ "$skip" -ne "1" ] && . $SERVERDIR/bin/ports.sh
+    [ "$skip" -ne "1" ] && . $BINDIR/ports.sh
 
 
     # Part 6: tar/zip the folder and make this the new default source package
-    [ "$skip" -ne "1" ] && . $SERVERDIR/bin/package.sh
+    [ "$skip" -ne "1" ] && . $BINDIR/package.sh
 
 
     # Clean up if some of the ports failed to install
@@ -219,11 +212,11 @@ do
     if [ -n "$EMAIL" ]; then
         if [ "$skip" -eq "1" ]; then
             msg="I'm sorry. Your build failed. Attached are the relevant logs."
-            logs=`tail -n 20 $LOGDIR/*$DATE.log`
+            logs=`tail -n 20 $LOGDIR/*$BUILD_ID.log`
             msg="$msg
     $logs"
         else
-            msg="Your build ($BRANCH $DATE) was successfully built and queued for processing.\n\n"
+            msg="Your build ($BRANCH $REV) was successfully built and queued for processing.\n\n"
             # Calculate worst-case time before results are ready,
             # assuming a slave run takes 2 hours
             h=`wc -l $SRCPKGDIR/queue.* | sort -r | head -n 1 | awk '{print $1}'`
@@ -237,7 +230,7 @@ do
 
     # If requested, remove all logs from this run. All logs are saved if an error occurred.
     if [ "$ALLLOGS" -eq "0" ]; then
-       [ "$skip" -ne "1" ] && rm "$LOGDIR"/*$DATE.log
+       [ "$skip" -ne "1" ] && rm "$LOGDIR"/*$BUILD_ID.log
     fi
 
     # Write status
